@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.angular/
+
+# Cache / tooling
+.npm/
+.cache/
+*.log
+
+# Tests / coverage
+coverage/
+
+# Environment & secrets
+.env
+.env.*.local
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+
+# Debug / misc
+*.tmp

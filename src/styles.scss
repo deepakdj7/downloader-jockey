@@ -1,0 +1,48 @@
+:root {
+  --dj-bg: #fafbff;
+  --dj-mint: #88d498;
+  --dj-lavender: #b19ff9;
+  --dj-sun: #fff3b0;
+  --dj-card-border: #e8e8ec;
+  --dj-text: #111111;
+  --dj-black: #111111;
+  --dj-muted: #7a7a82;
+  --dj-bar-track: #ececec;
+  --dj-shadow: 0 8px 28px rgba(17, 17, 17, 0.06);
+  --dj-shadow-lg: 0 20px 50px rgba(17, 17, 17, 0.08);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-weight: 500;
+  color: var(--dj-text);
+  -webkit-font-smoothing: antialiased;
+  background-color: #f6f8fc;
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(177, 159, 249, 0.22), transparent 55%),
+    radial-gradient(ellipse 90% 60% at 0% 50%, rgba(136, 212, 152, 0.18), transparent 50%),
+    radial-gradient(ellipse 70% 50% at 100% 80%, rgba(255, 243, 176, 0.35), transparent 45%),
+    linear-gradient(180deg, #f8f9fc 0%, #ffffff 35%, #f6faf7 100%);
+  background-attachment: fixed;
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+}
