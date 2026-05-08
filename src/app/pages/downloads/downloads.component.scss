@@ -29,6 +29,12 @@
   box-shadow: 0 2px 12px rgba(17, 17, 17, 0.04);
 }
 
+.shell-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
 .icon-btn {
   width: 40px;
   height: 40px;
@@ -40,11 +46,112 @@
   cursor: pointer;
   color: var(--dj-muted);
   box-shadow: 0 2px 8px rgba(17, 17, 17, 0.04);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .icon-btn:hover {
   color: var(--dj-text);
   border-color: var(--dj-lavender);
+}
+
+.icon-btn.active {
+  color: var(--dj-mint);
+  border-color: rgba(62, 177, 145, 0.55);
+  background: rgba(62, 177, 145, 0.08);
+}
+
+.ig-auth-icon {
+  display: block;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(17, 17, 17, 0.35);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal {
+  width: 100%;
+  max-width: 400px;
+  padding: 1.25rem 1.35rem 1.35rem;
+}
+
+.modal-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.modal-lead {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--dj-muted);
+}
+
+.modal-status {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.modal-err {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: #c43b3b;
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.field-password .label {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.password-input-row {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+.password-input-row .input {
+  flex: 1;
+  padding-right: 2.75rem;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dj-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle-btn:hover {
+  color: var(--dj-text);
+  background: rgba(17, 17, 17, 0.06);
 }
 
 .stage {

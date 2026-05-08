@@ -1,7 +1,29 @@
 <div class="shell">
   <header class="shell-head">
     <span class="logo">DownloaderJockey</span>
-    <button type="button" class="icon-btn" (click)="toggleApi()" aria-label="API settings">⋯</button>
+    <div class="shell-head-actions">
+      <button
+        type="button"
+        class="icon-btn"
+        [class.active]="igAuth.authState().loggedIn"
+        (click)="openIgAuth()"
+        [attr.aria-label]="igAuth.authState().loggedIn ? 'Instagram session: signed in' : 'Instagram sign in'"
+        [title]="
+          igAuth.authState().loggedIn
+            ? 'Instagram: ' + (igAuth.authState().username ?? 'signed in')
+            : 'Instagram: sign in (session on server only)'
+        "
+      >
+        <svg class="ig-auth-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+          />
+        </svg>
+      </button>
+      <button type="button" class="icon-btn" (click)="toggleApi()" aria-label="API settings">⋯</button>
+    </div>
   </header>
 
   @if (toast()) {
@@ -11,9 +33,9 @@
   @if (showApiPanel()) {
     <section class="api-panel card elevated">
       <p class="api-hint">
-        <strong>YouTube</strong> uses the companion server with <strong>yt-dlp</strong> (local:
-        <code>http://localhost:3847</code>). <strong>Instagram</strong> cannot run in the browser or on GitHub Pages — paste the
-        <strong>HTTPS origin</strong> of your small resolver (see <code>workers/instagram-resolver</code> in the repo).
+        <strong>YouTube</strong>: companion API + <strong>yt-dlp</strong> (local <code>http://localhost:3847</code>).
+        <strong>Instagram</strong>: local API + Instaloader (<code>http://localhost:3848</code>). Sign in with the
+        <strong>lock</strong> icon for a server-only session (password never stored in the browser).
       </p>
       <label class="field">
         <span class="label">YouTube API base URL (yt-dlp)</span>
@@ -27,13 +49,13 @@
         />
       </label>
       <label class="field">
-        <span class="label">Instagram resolver base URL (HTTPS)</span>
+        <span class="label">Instagram API base URL</span>
         <input
           class="input"
           type="url"
           name="instagramBase"
           [(ngModel)]="instagramUrlInput"
-          placeholder="https://your-worker.workers.dev"
+          placeholder="http://localhost:3848"
           autocomplete="off"
         />
       </label>
@@ -284,4 +306,69 @@
     </section>
     </div>
   </div>
+
+  @if (showIgAuth()) {
+    <div class="modal-backdrop" (click)="closeIgAuth()">
+      <div class="modal card elevated" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="ig-auth-title">
+        <h2 id="ig-auth-title" class="modal-title">Instagram</h2>
+        <p class="modal-lead">
+          Sign in for private posts or when Instagram blocks anonymous access. Your password is sent once to the local API and
+          <strong>not</strong> stored. The API session ends when you sign out, restart the API, or close this tab (refresh keeps the
+          session). Use the eye button to show or hide the password while typing.
+        </p>
+        @if (igAuth.authState().loggedIn) {
+          <p class="modal-status">
+            Signed in as <strong>{{ igAuth.authState().username }}</strong>
+          </p>
+          <div class="modal-actions">
+            <button type="button" class="pill" (click)="onIgLogout()">Sign out</button>
+            <button type="button" class="pill dark" (click)="closeIgAuth()">Close</button>
+          </div>
+        } @else {
+          <label class="field">
+            <span class="label">Username</span>
+            <input class="input" name="igUser" [(ngModel)]="igLoginUser" autocomplete="username" />
+          </label>
+          <div class="field field-password">
+            <span class="label">Password</span>
+            <div class="password-input-row">
+              <input
+                class="input"
+                name="igPass"
+                [type]="igShowPassword() ? 'text' : 'password'"
+                [(ngModel)]="igLoginPass"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="password-toggle-btn"
+                (click)="toggleIgPasswordVisible()"
+                [attr.aria-pressed]="igShowPassword()"
+                [attr.aria-label]="igShowPassword() ? 'Hide password' : 'Show password'"
+              >
+                @if (igShowPassword()) {
+                  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75">
+                    <path d="M3 3l18 18M10.5 10.5a3 3 0 004 4M9.88 9.88a3 3 0 104.24 4.24" stroke-linecap="round" />
+                    <path d="M6.6 6.6C4.23 8.14 3 10 3 12s3 7 9 7c1.57 0 2.94-.35 4.12-.92M17.3 14.7C19.42 12.73 21 11 21 11s-3-7-9-7c-.73 0-1.41.08-2.05.23" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                } @else {
+                  <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.75">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                }
+              </button>
+            </div>
+          </div>
+          @if (igAuthError()) {
+            <p class="modal-err">{{ igAuthError() }}</p>
+          }
+          <div class="modal-actions">
+            <button type="button" class="pill dark" (click)="submitIgLogin()" [disabled]="igAuthBusy()">Sign in</button>
+            <button type="button" class="pill" (click)="closeIgAuth()" [disabled]="igAuthBusy()">Cancel</button>
+          </div>
+        }
+      </div>
+    </div>
+  }
 </div>

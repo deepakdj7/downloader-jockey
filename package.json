@@ -4,6 +4,12 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:ui": "ng serve",
+    "start:yt-api": "npm --prefix server start",
+    "start:ig-api": "cd server/python && python3 -m uvicorn main:app --host 127.0.0.1 --port 3848 --reload",
+    "start:all": "concurrently -k -n ig,yt,ui -c blue,magenta,green \"npm run start:ig-api\" \"npm run start:yt-api\" \"npm run start:ui\"",
+    "bootstrap": "node scripts/bootstrap.mjs",
+    "go": "npm run bootstrap && npm run start:all",
     "build": "ng build",
     "build:gh": "ng build --configuration gh && cp dist/downloader-jockey-gh/browser/index.html dist/downloader-jockey-gh/browser/404.html",
     "watch": "ng build --watch --configuration development",
@@ -18,7 +24,6 @@
     "@angular/platform-browser": "^19.2.0",
     "@angular/platform-browser-dynamic": "^19.2.0",
     "@angular/router": "^19.2.0",
-    "@angular/service-worker": "^19.2.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -28,6 +33,7 @@
     "@angular/cli": "^19.2.25",
     "@angular/compiler-cli": "^19.2.0",
     "@types/jasmine": "~5.1.0",
+    "concurrently": "^9.1.2",
     "jasmine-core": "~5.6.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

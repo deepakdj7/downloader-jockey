@@ -9,6 +9,7 @@ import {
 import { PlatformDetectorService } from './platform-detector.service';
 import { DownloadApiService } from './download-api.service';
 import { InstagramResolverService } from './instagram-resolver.service';
+import { getHttpErrorMessage } from '../utils/http-error.util';
 
 const RECENT_KEY = 'downloaderJockeyRecent';
 
@@ -54,7 +55,7 @@ export class DownloadQueueService {
       return {
         ok: false,
         message:
-          'Set the Instagram resolver URL (⋯). GitHub Pages cannot scrape IG; use a small HTTPS worker (see README).',
+          'Set the Instagram API URL under ⋯ (e.g. http://localhost:3848 when running npm run start:all).',
       };
     }
     return { ok: true };
@@ -132,8 +133,11 @@ export class DownloadQueueService {
         this.pollUntilDone(job.id, res.jobId);
       },
       error: (err) => {
-        const msg = err?.error?.error ?? err?.message ?? 'Request failed';
-        this.patchJob(job.id, { status: 'error', errorMessage: String(msg), progress: 0 });
+        this.patchJob(job.id, {
+          status: 'error',
+          errorMessage: getHttpErrorMessage(err, 'Request failed'),
+          progress: 0,
+        });
       },
     });
   }
@@ -200,12 +204,11 @@ export class DownloadQueueService {
         this.pushRecentFromJob(job.id);
       },
       error: (err) => {
-        const msg =
-          err?.error?.error ??
-          err?.error?.message ??
-          err?.message ??
-          'Instagram resolver failed';
-        this.patchJob(job.id, { status: 'error', errorMessage: String(msg), progress: 0 });
+        this.patchJob(job.id, {
+          status: 'error',
+          errorMessage: getHttpErrorMessage(err, 'Instagram resolver failed'),
+          progress: 0,
+        });
       },
     });
   }

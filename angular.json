@@ -73,7 +73,6 @@
                 }
               ],
               "outputHashing": "all",
-              "serviceWorker": "ngsw-config.json",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -85,7 +84,6 @@
               "baseHref": "/downloader-jockey/",
               "outputPath": "dist/downloader-jockey-gh",
               "outputHashing": "all",
-              "serviceWorker": "ngsw-config.json",
               "budgets": [
                 {
                   "type": "initial",

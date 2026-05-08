@@ -36,7 +36,7 @@ function assertYoutubeUrl(urlStr) {
     host === 'youtu.be' || host === 'youtube.com' || host.endsWith('.youtube.com');
   if (!allowed) {
     throw new Error(
-      'This server only handles YouTube. Instagram uses a separate HTTPS resolver in the PWA (see README / workers/instagram-resolver).',
+      'This server only handles YouTube. Instagram uses the Instaloader API (see README / server/python).',
     );
   }
 }

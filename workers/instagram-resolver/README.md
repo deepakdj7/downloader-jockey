@@ -1,6 +1,8 @@
 # Instagram resolver (HTTPS)
 
-The PWA on **GitHub Pages** cannot talk to Instagram directly (CORS, auth, bot checks). You deploy **any** HTTPS backend that implements this JSON API; the app runs entirely in the browser and **fetches media URLs you return**.
+**Local default:** the repo ships [`server/python/main.py`](../../server/python/main.py) (Instaloader + FastAPI) on `http://localhost:3848` — no separate worker required for desktop use. It also exposes **`GET /api/instagram/auth/status`**, **`POST /api/instagram/auth/login`** with JSON `{ "username": "…", "password": "…" }`, and **`POST /api/instagram/auth/logout`** for optional UI login (password not stored client-side).
+
+For a **remote** deployment (or custom logic), implement **any** HTTPS backend with this JSON API; the browser **fetches** the media URLs you return (CORS must allow the app origin).
 
 ## Endpoints (same origin = base URL you paste in ⋯)
 

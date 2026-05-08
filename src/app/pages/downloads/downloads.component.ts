@@ -23,8 +23,10 @@ import { DownloadQueueService } from '../../services/download-queue.service';
 import { PlatformDetectorService } from '../../services/platform-detector.service';
 import { DownloadApiService } from '../../services/download-api.service';
 import { InstagramResolverService } from '../../services/instagram-resolver.service';
+import { InstagramAuthService } from '../../services/instagram-auth.service';
 import { DownloadJob, YoutubeFormat } from '../../models/download.models';
 import { PreviewMeta } from '../../models/preview.models';
+import { getHttpErrorMessage } from '../../utils/http-error.util';
 
 export interface PreviewRow {
   key: string;
@@ -48,6 +50,7 @@ export class DownloadsComponent {
   readonly platform = inject(PlatformDetectorService);
   readonly api = inject(DownloadApiService);
   readonly ig = inject(InstagramResolverService);
+  readonly igAuth = inject(InstagramAuthService);
   urlInput = '';
   ytFormat: YoutubeFormat = 'video';
   apiUrlInput = '';
@@ -69,6 +72,14 @@ export class DownloadsComponent {
   /** Active download job id for the single-URL flow (right-panel progress). */
   singleJobId = signal<string | null>(null);
 
+  showIgAuth = signal(false);
+  igLoginUser = '';
+  igLoginPass = '';
+  igAuthBusy = signal(false);
+  igAuthError = signal<string | null>(null);
+  /** Show password characters in the Instagram login modal (tab-only UI state). */
+  igShowPassword = signal(false);
+
   readonly batchMode = computed(() => this.batchRows().length > 0);
 
   readonly previewMeta = computed(() => this.singlePreview()?.meta ?? null);
@@ -81,6 +92,8 @@ export class DownloadsComponent {
     if (!this.api.hasYoutubeApiConfigured() && !this.ig.hasResolver()) {
       this.showApiPanel.set(true);
     }
+
+    this.igAuth.refreshStatus().subscribe();
 
     this.urlSubject
       .pipe(
@@ -117,7 +130,7 @@ export class DownloadsComponent {
             this.singlePreview.set({
               loading: false,
               error:
-                'Instagram cannot run inside this static app. Deploy the HTTPS resolver from workers/instagram-resolver, then paste its origin under ⋯ → “Instagram resolver base URL”.',
+                'Set the Instagram API URL under ⋯ (local: http://localhost:3848 — run npm run start:ig-api or npm run start:all).',
             });
             return EMPTY;
           }
@@ -130,12 +143,10 @@ export class DownloadsComponent {
           return preview$.pipe(
             tap((meta) => this.singlePreview.set({ loading: false, meta })),
             catchError((err) => {
-              const msg =
-                err?.error?.error ??
-                err?.error?.message ??
-                err?.message ??
-                'Preview failed';
-              this.singlePreview.set({ loading: false, error: String(msg) });
+              this.singlePreview.set({
+                loading: false,
+                error: getHttpErrorMessage(err, 'Preview failed'),
+              });
               return EMPTY;
             }),
           );
@@ -162,6 +173,67 @@ export class DownloadsComponent {
     this.toast.set('Settings saved.');
     setTimeout(() => this.toast.set(null), 2400);
     this.urlSubject.next(this.urlInput);
+    this.igAuth.refreshStatus().subscribe();
+  }
+
+  openIgAuth(): void {
+    this.igAuthError.set(null);
+    this.igShowPassword.set(false);
+    this.showIgAuth.set(true);
+    this.igAuth.refreshStatus().subscribe();
+  }
+
+  closeIgAuth(): void {
+    this.showIgAuth.set(false);
+    this.igLoginPass = '';
+    this.igAuthError.set(null);
+    this.igShowPassword.set(false);
+  }
+
+  toggleIgPasswordVisible(): void {
+    this.igShowPassword.update((v) => !v);
+  }
+
+  submitIgLogin(): void {
+    if (!this.ig.hasResolver()) {
+      this.igAuthError.set('Set the Instagram API URL under ⋯ (e.g. http://localhost:3848) first.');
+      return;
+    }
+    const u = this.igLoginUser.trim();
+    if (!u || !this.igLoginPass) {
+      this.igAuthError.set('Enter username and password.');
+      return;
+    }
+    this.igAuthBusy.set(true);
+    this.igAuthError.set(null);
+    this.igAuth.login(u, this.igLoginPass).subscribe({
+      next: () => {
+        this.igLoginPass = '';
+        this.igAuthBusy.set(false);
+        this.closeIgAuth();
+        this.toast.set('Instagram session is active on the API (this machine).');
+        setTimeout(() => this.toast.set(null), 3000);
+      },
+      error: (err) => {
+        this.igAuthBusy.set(false);
+        this.igAuthError.set(getHttpErrorMessage(err, 'Login failed'));
+      },
+    });
+  }
+
+  onIgLogout(): void {
+    this.igAuthBusy.set(true);
+    this.igAuth.logout().subscribe({
+      next: () => {
+        this.igAuthBusy.set(false);
+        this.toast.set('Instagram session cleared on the API.');
+        setTimeout(() => this.toast.set(null), 2800);
+        this.closeIgAuth();
+      },
+      error: () => {
+        this.igAuthBusy.set(false);
+      },
+    });
   }
 
   get detected() {
@@ -284,12 +356,10 @@ export class DownloadsComponent {
               });
             }),
             catchError((err) => {
-              const msg =
-                err?.error?.error ?? err?.message ?? 'Preview failed';
               this.patchRow(row.key, {
                 loading: false,
                 title: row.title || row.url,
-                error: String(msg),
+                error: getHttpErrorMessage(err, 'Preview failed'),
               });
               return of(null);
             }),
